@@ -33,30 +33,36 @@ if more than 2 sheets in active sheet use the code below:
 
 ```
 function doPost(e) {
-  // Parse the incoming data
-  var params = JSON.parse(e.postData.contents);
+  try {
+    // Parse incoming data
+    var params = JSON.parse(e.postData.contents);
 
-  // Open the active spreadsheet
-  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    // Open the active spreadsheet
+    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
-  // Specify the sheets by their names
-  var sheet1 = spreadsheet.getSheetByName("Sheet1");
-  var sheet2 = spreadsheet.getSheetByName("Sheet2");
+    // Get references to the sheets
+    var sheet1 = spreadsheet.getSheetByName("Sheet1");
+    var sheet2 = spreadsheet.getSheetByName("Sheet2");
 
-  // Check where to append data
-  if (params.targetSheet === "Sheet1") {
-    sheet1.appendRow([params.name, params.task]);
-  } else if (params.targetSheet === "Sheet2") {
-    sheet2.appendRow([params.name, params.task]);
-  } else {
+    // Append data to the correct sheet
+    if (params.targetSheet === "Sheet1") {
+      sheet1.appendRow([params.name, params.task]);
+    } else if (params.targetSheet === "Sheet2") {
+      sheet2.appendRow([params.name, params.task]);
+    } else {
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: "error", message: "Invalid target sheet specified" })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
     return ContentService.createTextOutput(
-      JSON.stringify({ status: "error", message: "Invalid target sheet specified" })
+      JSON.stringify({ status: "success", message: "Data added to " + params.targetSheet })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "error", message: error.message })
     ).setMimeType(ContentService.MimeType.JSON);
   }
-
-  return ContentService.createTextOutput(
-    JSON.stringify({ status: "success", message: "Data added to Google Sheet" })
-  ).setMimeType(ContentService.MimeType.JSON);
 }
 
 
@@ -114,6 +120,66 @@ Here’s an example of a simple HTML form to collect and send data:
 </body>
 </html>
 ```
+
+Changes when 2 sheets are there in active sheet. (optional) 
+```
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Data to Google Sheets</title>
+</head>
+<body>
+  <h1>Send Data to Google Sheets</h1>
+  <form id="dataForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <label for="task">Task:</label>
+    <input type="text" id="task" name="task" required><br><br>
+
+    <label for="targetSheet">Target Sheet:</label>
+    <select id="targetSheet" name="targetSheet" required>
+      <option value="Sheet1">Sheet1</option>
+      <option value="Sheet2">Sheet2</option>
+    </select><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    document.getElementById('dataForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const task = document.getElementById('task').value;
+      const targetSheet = document.getElementById('targetSheet').value;
+
+      try {
+        const response = await fetch('YOUR_WEB_APP_URL', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, task, targetSheet }),
+        });
+
+        const result = await response.json();
+        alert(result.message);
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+```
+
+
 ---
 ##  4. Replace `YOUR_WEB_APP_URL`
 - Replace `YOUR_WEB_APP_URL` in the HTML file with the Web App URL you copied earlier.
