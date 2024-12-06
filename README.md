@@ -29,6 +29,39 @@ function doPost(e) {
 }
 ```
 
+if more than 2 sheets in active sheet use the code below:
+
+```
+function doPost(e) {
+  // Parse the incoming data
+  var params = JSON.parse(e.postData.contents);
+
+  // Open the active spreadsheet
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+
+  // Specify the sheets by their names
+  var sheet1 = spreadsheet.getSheetByName("Sheet1");
+  var sheet2 = spreadsheet.getSheetByName("Sheet2");
+
+  // Check where to append data
+  if (params.targetSheet === "Sheet1") {
+    sheet1.appendRow([params.name, params.task]);
+  } else if (params.targetSheet === "Sheet2") {
+    sheet2.appendRow([params.name, params.task]);
+  } else {
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "error", message: "Invalid target sheet specified" })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(
+    JSON.stringify({ status: "success", message: "Data added to Google Sheet" })
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+```
+
 3)  Save the project with a name like `SubmitToGoogleSheet`.
 4) Click **Deploy > New deployment**.
 	- Select **Web app**.
