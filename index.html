@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Send Data to Google Sheet</title>
+  </head>
+  <body>
+    <form id="dataForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required /><br /><br />
+
+      <label for="task">Task:</label>
+      <input type="text" id="task" name="task" required /><br /><br />
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <script>
+      document
+        .getElementById("dataForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const task = document.getElementById("task").value;
+
+          const response = await fetch(
+            "https://script.google.com/a/macros/liveewire.com/s/AKfycbyxrZKNWevlmt1LlW4UaTkAZcD9QBl_z6axfMwQhmEeKBp4WMjp1DCeGMCRsZ3Of68/exec",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ name, task }),
+            }
+          );
+
+          const result = await response.json();
+          alert(result.message);
+        });
+    </script>
+  </body>
+</html>
